@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(yocs_virtual_sensor)
+project(laser_manipulation)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED tf roscpp sensor_msgs ford_msgs pedsim_msgs geometry_msgs yocs_math_toolkit)

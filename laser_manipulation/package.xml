@@ -1,19 +1,13 @@
 <package>
-  <name>yocs_virtual_sensor</name>
-  <version>0.12.1</version>
+  <name>laser_manipulation</name>
+  <version>0.0.1</version>
   <description>
-      Virtual sensor that uses semantic map information to "see" obstacles undetectable by robot sensors.
-      
-      Current implementation cannot read obstacles from YAML files. Until this feature gets implemented, we
-      use auxiliary scripts to read and publish files' content. Data directory contains some example files.
+      Sensor manipulation node which uses external obstacle information in order to manipulate the LaserScan data, such that certain obstacls i.e humans can be made visible, even though they do not exist in real life or simulation.
   </description>
 
   <license>BSD</license>
   <author>Jorge Santos</author> 
-  <maintainer email="jihoonl@yujinrobot.com">Jihoon Lee</maintainer>
-  <url type="website">http://ros.org/wiki/yocs_virtual_sensor</url>
-  <url type="repository">https://github.com/yujinrobot/yujin_ocs</url>
-  <url type="bugtracker">https://github.com/yujinrobot/yujin_ocs/issues</url>
+  <maintainer email="todo@todo.com">TODO</maintainer>
   
   <buildtool_depend>catkin</buildtool_depend>
 

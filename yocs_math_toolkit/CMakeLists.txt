@@ -8,11 +8,11 @@ project(yocs_math_toolkit)
 find_package(catkin
     REQUIRED
     COMPONENTS
-        ecl_build
-        ecl_config
-        ecl_exceptions
-        ecl_formatters
-        ecl_linear_algebra
+        # ecl_build
+        # ecl_config
+        # ecl_exceptions
+        # ecl_formatters
+        # ecl_linear_algebra
         geometry_msgs
         roscpp
         tf
@@ -26,11 +26,11 @@ catkin_package(
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS
-        ecl_build
-        ecl_config
-        ecl_exceptions
-        ecl_formatters
-        ecl_linear_algebra
+        # ecl_build
+        # ecl_config
+        # ecl_exceptions
+        # ecl_formatters
+        # ecl_linear_algebra
         geometry_msgs
         roscpp
         tf
@@ -40,7 +40,7 @@ catkin_package(
 # Project Configuration
 ##############################################################################
 
-ecl_enable_cxx11_compiler()
+# ecl_enable_cxx11_compiler()
 add_definitions(${catkin_DEFINITIONS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 
