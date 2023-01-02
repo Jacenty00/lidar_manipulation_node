@@ -9,6 +9,7 @@
 #include "../../include/yocs_math_toolkit/geometry.hpp"
 
 
+
 namespace mtk
 {
 
@@ -233,6 +234,57 @@ bool sameFrame(const std::string& frame_a, const std::string& frame_b)
   return frame_a.compare(start_a, frame_a.length(), frame_b, start_b, frame_b.length()) == 0;
 }
 
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+
+double distance(const Vector2D& p1, const Vector2D& p2)
+{
+    // Calculate the Euclidean distance between two points
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+
+double shortestDistance(const Vector2D& point, double s1x, double s1y,double s2x, double s2y,
+                            double s3x, double s3y,double s4x, double s4y)
+{
+
+    Square square;
+	
+    square.p1 = {s1x, s1y};
+    square.p2 = {s2x, s2y};
+    square.p3 = {s3x, s3y};
+    square.p4 = {s4x, s4y};
+
+    // Check if the point is inside the square
+    if (point.x >= square.p1.x && point.x <= square.p2.x &&
+        point.y >= square.p1.y && point.y <= square.p3.y)
+    {
+        // Point is inside the square, so return the distance to the closest boundary point
+        double min_distance = distance(point, square.p1);
+        min_distance = std::min(min_distance, distance(point, square.p2));
+        min_distance = std::min(min_distance, distance(point, square.p3));
+        min_distance = std::min(min_distance, distance(point, square.p4));
+        return min_distance;
+    }
+    else
+    {
+        // Point is outside the square, so calculate the distance to each side and return the minimum
+        double min_distance = distance(point, Vector2D{square.p1.x, square.p1.y});
+        min_distance = std::min(min_distance, distance(point, Vector2D{square.p2.x, square.p1.y}));
+        min_distance = std::min(min_distance, distance(point, Vector2D{square.p2.x, square.p3.y}));
+        min_distance = std::min(min_distance, distance(point, Vector2D{square.p1.x, square.p3.y}));
+        return min_distance;
+    }
+}
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+
 double pointSegmentDistance(double px, double py, double s1x, double s1y, double s2x, double s2y)
 {
   // Return minimum distance between line segment s1-s2 and point p
@@ -245,6 +297,7 @@ double pointSegmentDistance(double px, double py, double s1x, double s1y, double
   // We find projection of point p onto the line.
   // It falls where t = [(p - s1) . (s2 - s1)] / |s2 - s1|^2
   double t = (- s1x * (s2x - s1x) - s1y * (s2y - s1y)) / l;
+
   if (t < 0.0)                           // Beyond the s1 end of the segment
     return distance2D(s1x, s1y);
 
@@ -254,6 +307,12 @@ double pointSegmentDistance(double px, double py, double s1x, double s1y, double
   // Projection falls on the segment
   return distance2D(s1x + t * (s2x - s1x), s1y + t * (s2y - s1y));
 }
+
+
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+
 
 bool raySegmentIntersection(double r1x, double r1y, double r2x, double r2y,
                             double s1x, double s1y, double s2x, double s2y,
@@ -282,6 +341,9 @@ bool raySegmentIntersection(double r1x, double r1y, double r2x, double r2y,
   }
   return false;
 }
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
 
 bool rayCircleIntersection(double rx, double ry, double cx, double cy, double radius,
                            double& ix, double& iy, double& distance)
@@ -327,6 +389,129 @@ bool rayCircleIntersection(double rx, double ry, double cx, double cy, double ra
 
   return true;
 }
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+Vector2D Multiply(const Vector2D& v, double scalar)
+{
+    Vector2D result;
+    result.x = v.x * scalar;
+    result.y = v.y * scalar;
+    return result;
+}
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+void calculateRayDirection(Ray& ray, const Vector2D& start, const Vector2D& end)
+{
+    ray.origin = start;
+    ray.direction.x = end.x - start.x;
+    ray.direction.y = end.y - start.y;
+
+    double length = std::sqrt(ray.direction.x * ray.direction.x + ray.direction.y * ray.direction.y);
+    ray.direction.x /= length;
+    ray.direction.y /= length;
+  
+    
+}
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+// Calculates the intersection point between a ray and a line defined by two points
+bool intersectRayLine(const Ray& ray, const Vector2D& A, const Vector2D& B, Vector2D& intersection)
+{
+    // Calculate the intersection point of the ray and the line
+    double t = (B.y - A.y) * (ray.origin.x - A.x) - (B.x - A.x) * (ray.origin.y - A.y);
+    t /= (B.x - A.x) * ray.direction.y - (B.y - A.y) * ray.direction.x;
+    intersection = ray.origin + Multiply(ray.direction, t);
+
+    // Check if the intersection point is within the bounds of the line segment
+    return (std::min(A.x, B.x) <= intersection.x && intersection.x <= std::max(A.x, B.x)) &&
+           (std::min(A.y, B.y) <= intersection.y && intersection.y <= std::max(A.y, B.y));
+}
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+// Check if a point is on a line segment defined by two points
+bool isPointOnLineSegment(const Vector2D& point, const Vector2D& A, const Vector2D& B)
+{
+    // Check if the point is within the bounds of the line segment
+    return (std::min(A.x, B.x) <= point.x && point.x <= std::max(A.x, B.x)) &&
+           (std::min(A.y, B.y) <= point.y && point.y <= std::max(A.y, B.y));
+}
+
+//–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+bool intersectRaySquare(const Ray& ray, double s1x, double s1y,double s2x, double s2y,
+                            double s3x, double s3y,double s4x, double s4y,
+                            double& ix, double& iy, double& distance)
+{
+
+    Square square;
+	
+    square.p1 = {s1x, s1y};
+    square.p2 = {s2x, s2y};
+    square.p3 = {s3x, s3y};
+    square.p4 = {s4x, s4y};
+
+
+    // Check if the ray intersects the first side of the square
+    Vector2D intersection;
+    if (intersectRayLine(ray, square.p1, square.p2, intersection))
+    {
+        // Check if the intersection point is within the bounds of the side
+        if (isPointOnLineSegment(intersection, square.p1, square.p2))
+        {
+            ix = intersection.x;
+            iy = intersection.y;
+            distance = distance2D(ix, iy);
+            return true;
+        }
+    }
+
+    // Check if the ray intersects the second side of the square
+    if (intersectRayLine(ray, square.p2, square.p3, intersection))
+    {
+        // Check if the intersection point is within the bounds of the side
+        if (isPointOnLineSegment(intersection, square.p2, square.p3))
+        {   
+            ix = intersection.x;
+            iy = intersection.y;
+            distance = distance2D(ix, iy);
+            return true;
+        }
+    }
+
+    // Check if the ray intersects the second side of the square
+    if (intersectRayLine(ray, square.p3, square.p4, intersection))
+    {
+        // Check if the intersection point is within the bounds of the side
+        if (isPointOnLineSegment(intersection, square.p3, square.p4))
+        {   
+            ix = intersection.x;
+            iy = intersection.y;
+            distance = distance2D(ix, iy);
+            return true;
+        }
+    }
+
+    // Check if the ray intersects the second side of the square
+    if (intersectRayLine(ray, square.p4, square.p1, intersection))
+    {
+        // Check if the intersection point is within the bounds of the side
+        if (isPointOnLineSegment(intersection, square.p4, square.p1))
+        {   
+            ix = intersection.x;
+            iy = intersection.y;
+            distance = distance2D(ix, iy);
+            return true;
+        }
+    }
+
+    // If the ray does not intersect any of the sides, return a default Vector2D object
+    return false;
+}
+
+
 
 
 } /* namespace mtk */

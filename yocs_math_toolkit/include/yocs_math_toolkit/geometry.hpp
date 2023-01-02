@@ -13,7 +13,9 @@
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
-
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 namespace mtk
 {
@@ -136,7 +138,7 @@ double pointSegmentDistance(double px, double py, double s1x, double s1y, double
  * @param r2x rays's end point x-coordinate
  * @param r2y rays's end point y-coordinate
  * @param s1x segment's point 1 x-coordinate
- * @param s1y segment's point 1 y-coordinate
+ * @param s1y segment's point 1 y-coordinat
  * @param s2x segment's point 2 x-coordinate
  * @param s2y segment's point 2 y-coordinate
  * @param ix  intersection point (if any) x-coordinate
@@ -162,6 +164,71 @@ bool raySegmentIntersection(double r1x, double r1y, double r2x, double r2y,
  */
 bool rayCircleIntersection(double rx, double ry, double cx, double cy, double radius,
                            double& ix, double& iy, double& distance);
+
+
+
+struct Vector3D
+{
+    float x, y, z;
+};
+
+struct Vector2D
+{
+    double x, y;
+    Vector2D operator-(const Vector2D& other) const
+    {
+        return {x - other.x, y - other.y};
+    };
+      // Addition operator
+    Vector2D operator+(const Vector2D& other) const
+    {
+        Vector2D result;
+        result.x = x + other.x;
+        result.y = y + other.y;
+        return result;
+    }
+};
+
+
+struct Ray
+{
+    Vector2D origin, direction;
+};
+
+struct Square
+{
+    Vector2D p1, p2, p3, p4;
+};
+
+
+void calculateRayDirection(Ray& ray, const Vector2D& start, const Vector2D& end);
+
+
+struct Box
+{
+    Vector2D p1, p2, p3, p4;
+};
+
+double dot(const Vector2D& u, const Vector2D& v);
+
+double cross(const Vector2D& u, const Vector2D& v);
+
+bool intersectRayBox(double r1x, double r1y, double r2x, double r2y,
+                            double s1x, double s1y, double s1z,double s2x, double s2y,double s2z,
+                            double s3x, double s3y, double s3z,double s4x, double s4y,double s4z,
+                            double& ix, double& iy, double& distance);
+
+bool intersectRayPlane(const Ray& ray, const Vector2D& A, const Vector2D& B, const Vector2D& C, const Vector2D& D, Vector2D& intersection);
+
+bool intersectRayLine(const Ray& ray, const Vector2D& A, const Vector2D& B, Vector2D& intersection);
+bool isPointOnLineSegment(const Vector2D& point, const Vector2D& A, const Vector2D& B);
+bool intersectRaySquare(const Ray& ray, double s1x, double s1y,double s2x, double s2y,
+                            double s3x, double s3y,double s4x, double s4y,
+                            double& ix, double& iy, double& distance);
+double distance(const Vector2D& p1, const Vector2D& p2);
+double shortestDistance(const Vector2D& point, double s1x, double s1y,double s2x, double s2y,
+                            double s3x, double s3y,double s4x, double s4y);
+
 
 } /* namespace mtk */
 

@@ -24,7 +24,7 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ## Declare a cpp executable
-add_executable(${PROJECT_NAME}_node src/virtual_sensor_node.cpp)
+add_executable(${PROJECT_NAME}_node src/yocs_virtual_sensor_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 # add_dependencies(${PROJECT_NAME}_node yocs_msgs_gencpp)
