@@ -39,8 +39,12 @@ target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 install(TARGETS ${PROJECT_NAME}_node
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-install(PROGRAMS scripts/column_publisher.py
+
+catkin_install_python(PROGRAMS
                  scripts/column_publisher.py
+                 scripts/column_publisher.py
+                 scripts/agent_pos_gen.py
+                 scripts/agents_visualizer.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(DIRECTORY include/${PROJECT_NAME}/

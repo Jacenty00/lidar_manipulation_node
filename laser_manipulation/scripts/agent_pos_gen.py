@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 import rospy
 import pedsim_msgs.msg as agents
 import numpy as np
+import json
 
 
 class ArenaAgent:
     def __init__(self, starting_pos, waypoints, velocity):
-        self.waypoints = np.array(starting_pos + waypoints)
+        self.waypoints = np.array([starting_pos] + waypoints, dtype=object)
         self.velocity = velocity
         self.target_waypoint_index = 1
         self.current_pos = np.array(starting_pos)
@@ -45,19 +47,18 @@ class ArenaAgentsPublisher:
         pedsim_agents = scenario_file["pedsim_agents"]
         self.agents = []
         for agent in pedsim_agents:
-            agent = ArenaAgent(
-                agent["starting_pos"], agent["waypoints"], agent["velocity"]
-            )
+            agent = ArenaAgent(agent["pos"], agent["waypoints"], agent["vmax"])
             self.agents.append(agent)
 
         self.starting_time = None
-        self.pub = rospy.Publisher("arena_agents", agents.AgentStates, queue_size=1)
+        self.pub = rospy.Publisher("simulated_agents", agents.AgentStates, queue_size=1)
         self.pub_timer = rospy.Timer(rospy.Duration(0.1), self.pub_agents)
 
     def pub_agents(self, event):
-        if self.starting_time is None:
-            self.starting_time = rospy.Time.now()
-        time_delta = rospy.Time.now() - self.starting_time
+        if event.last_real is None:
+            time_delta = 0.0
+        else:
+            time_delta = (event.current_real - event.last_real).to_sec()
         agent_states = agents.AgentStates()
         for agent in self.agents:
             agent_state = agents.AgentState()
@@ -73,3 +74,9 @@ class ArenaAgentsPublisher:
         with open(scenario_file_path, "r") as file:
             content = json.load(file)
             return content
+
+
+if __name__ == "__main__":
+    rospy.init_node("arena_agents_publisher")
+    arena_agents_publisher = ArenaAgentsPublisher()
+    rospy.spin()
