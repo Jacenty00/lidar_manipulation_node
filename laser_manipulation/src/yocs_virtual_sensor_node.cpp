@@ -40,7 +40,7 @@ namespace virtual_sensor
   {
     scan_ = *msg;
 
-    scan_.header.stamp = ros::Time::now();
+    // scan_.header.stamp = ros::Time::now();
     std::string sensor_frame_id_ = msg->header.frame_id;
     tf::StampedTransform robot_gb;
 
@@ -64,13 +64,11 @@ namespace virtual_sensor
       tf::Transform obs_abs_tf;
       tf::poseMsgToTF(agents_[i].pose, obs_abs_tf);
       tf::Transform obs_tf = robot_gb_inv * obs_abs_tf;
-      //boost::shared_ptr<Obstacle> new_obs(new Column(std::to_string(agents_[i].id), obs_tf, 0.4, 1.6));
-       boost::shared_ptr<Obstacle> new_obs(new Wall(std::to_string(agents_[i].id), obs_tf, 0.4, 0.4, 1.6));
-     // boost::shared_ptr<Obstacle> new_obs(new Square(std::to_string(agents_[i].id), obs_tf, 0.4, 0.4, 1.6));
-      
-     
+      boost::shared_ptr<Obstacle> new_obs(new Column(std::to_string(agents_[i].id), obs_tf, 0.4, 1.6));
+      //   boost::shared_ptr<Obstacle> new_obs(new Wall(std::to_string(agents_[i].id), obs_tf, 0.4, 0.4, 1.6));/
+      // boost::shared_ptr<Obstacle> new_obs(new Square(std::to_string(agents_[i].id), obs_tf, 0.4, 0.4, 1.6));
+
       add(new_obs, obstacles);
-   
     }
 
     int ray = 0;
@@ -78,11 +76,12 @@ namespace virtual_sensor
     // Fire sensor "rays" and register closest hit, if any. We test hits_count_ consecutive objects; in most
     // cases 2 hits should be enough, although in some cases three or more ill-arranged obstacles will return
     // a wrong shortest distance (remember that obstacles are shorted by its closest distance to the robot)
+    int hits_count = 2;
     for (double ray_theta = scan_.angle_min; ray_theta <= scan_.angle_max; ray_theta += scan_.angle_increment)
     {
-      double rx = scan_.ranges[ray] * std::cos(ray_theta);
-      double ry = scan_.ranges[ray] * std::sin(ray_theta);
-     
+      double rx = scan_.range_max * std::cos(ray_theta);
+      double ry = scan_.range_max * std::sin(ray_theta);
+
       int hits = 0;
       // scan_.ranges[ray] = scan_.range_max;
 
@@ -93,6 +92,14 @@ namespace virtual_sensor
         {
           // Hit; take the shortest distance until now and keep checking until we reach hits_count_
           scan_.ranges[ray] = std::min(scan_.ranges[ray], (float)distance);
+          if (hits < hits_count)
+          {
+            hits++;
+          }
+          else
+          {
+            break; // enough hits
+          }
         }
       }
 
@@ -117,7 +124,6 @@ namespace virtual_sensor
       //  - remove those out of range
       //  - short by increasing distance to the robot
       std::vector<boost::shared_ptr<Obstacle>> obstacles;
-
     }
   }
 
@@ -170,7 +176,6 @@ int main(int argc, char **argv)
     return -1;
   }
   ROS_INFO("%s initialized", ros::this_node::getName().c_str());
-  
 
   // node.spin();
   ros::AsyncSpinner spinner(4); // Use 4 threads
