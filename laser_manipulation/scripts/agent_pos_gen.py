@@ -6,12 +6,13 @@ import json
 
 
 class ArenaAgent:
-    def __init__(self, starting_pos, waypoints, velocity):
+    def __init__(self, starting_pos, waypoints, velocity, name):
         self.waypoints = np.array([starting_pos] + waypoints, dtype=object)
         self.velocity = velocity
         self.target_waypoint_index = 1
         self.current_pos = np.array(starting_pos)
         self.current_direction = self.get_direction()
+        self.id = name
 
     def get_next_pos(self, time_delta):
         next_pos = (
@@ -46,9 +47,9 @@ class ArenaAgentsPublisher:
         scenario_file = self.read_scenario_file(scenario_file_path)
         pedsim_agents = scenario_file["pedsim_agents"]
         self.agents = []
-        for agent in pedsim_agents:
-            agent = ArenaAgent(agent["pos"], agent["waypoints"], agent["vmax"])
-            self.agents.append(agent)
+        for i, agent in enumerate(pedsim_agents):
+            a = ArenaAgent(agent["pos"], agent["waypoints"], agent["vmax"], i)
+            self.agents.append(a)
 
         self.starting_time = None
         self.pub = rospy.Publisher("simulated_agents", agents.AgentStates, queue_size=1)
@@ -63,6 +64,7 @@ class ArenaAgentsPublisher:
         for agent in self.agents:
             agent_state = agents.AgentState()
             new_pos = agent.get_next_pos(time_delta)
+            agent_state.id = agent.id
             agent_state.pose.position.x = new_pos[0]
             agent_state.pose.position.y = new_pos[1]
             agent_states.agent_states.append(agent_state)
