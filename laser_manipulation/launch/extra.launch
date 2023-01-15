@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="ped_relay" type="relay" pkg="topic_tools" args="pedsim_simulator/simulated_agents simulated_agents"/>
+    <node name="agents_visualizer" type="agents_visualizer.py" pkg="laser_manipulation"/>
+    
+</launch>
