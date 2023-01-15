@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import rospy
-import pedsim_msgs.msg as agents
-import numpy as np
 import json
+
+import numpy as np
+import pedsim_msgs.msg as agents
+import rospy
 
 
 class ArenaAgent:
@@ -24,7 +25,7 @@ class ArenaAgent:
                 self.waypoints[self.target_waypoint_index % len(self.waypoints)]
                 - self.current_pos
             )
-            < 0.1 * self.velocity
+            <= 0.4
         ):
             self.target_waypoint_index = self.target_waypoint_index + 1 % len(
                 self.waypoints
@@ -52,7 +53,9 @@ class ArenaAgentsPublisher:
             self.agents.append(a)
 
         self.starting_time = None
-        self.pub = rospy.Publisher("simulated_agents", agents.AgentStates, queue_size=1)
+        self.pub = rospy.Publisher(
+            "/simulated_agents", agents.AgentStates, queue_size=1
+        )
         self.pub_timer = rospy.Timer(rospy.Duration(0.1), self.pub_agents)
 
     def pub_agents(self, event):
