@@ -66,8 +66,8 @@ void LaserManipulationNode::laserScanCB(const sensor_msgs::LaserScan::ConstPtr &
   int hits_count = 2;
   for (double ray_theta = scan_.angle_min; ray_theta <= scan_.angle_max; ray_theta += scan_.angle_increment)
   {
-    double rx = scan_.ranges[ray] * std::cos(ray_theta);
-    double ry = scan_.ranges[ray] * std::sin(ray_theta);
+    double rx = scan_.range_max * std::cos(ray_theta);
+    double ry = scan_.range_max * std::sin(ray_theta);
 
     int hits = 0;
     // scan_.ranges[ray] = scan_.range_max;
@@ -129,7 +129,7 @@ bool LaserManipulationNode::add(boost::shared_ptr<Obstacle> &new_obs, std::vecto
       return true;
     }
   }
-  ROS_WARN("Obstacle out of range (distance: %f)", new_obs->distance());
+  // ROS_WARN("Obstacle out of range (distance: %f)", new_obs->distance());
   return false;
 }
 

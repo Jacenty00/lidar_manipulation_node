@@ -2,5 +2,8 @@
 <launch>
     <node name="ped_relay" type="relay" pkg="topic_tools" args="pedsim_simulator/simulated_agents simulated_agents"/>
     <node name="agents_visualizer" type="agents_visualizer.py" pkg="laser_manipulation"/>
-    
+    <node name="agents_pub" type="agent_pos_gen.py"  pkg="laser_manipulation">
+      <param name="scenario_json_path" value="$(find task-generator)/scenarios/ignc.json"/>
+      </node>
+    <node name="laser_manipulator" type="laser_manipulation_node" pkg="laser_manipulation"/>
 </launch>
