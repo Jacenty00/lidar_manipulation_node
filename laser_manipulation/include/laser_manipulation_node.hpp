@@ -181,13 +181,13 @@ public:
 
 private:
 	std::string global_frame_id_;
-	ros::Publisher virtual_obs_pub_;
+	ros::Publisher manipulated_scan_pub_;
 	ros::Subscriber laser_scan_sub_;
 	ros::Subscriber agents_poses_sub_;
 	sensor_msgs::LaserScan scan_;
 	tf::TransformListener tf_listener_;
 	std::vector<pedsim_msgs::AgentState> agents_;
-
+	double agent_radius_;
 	/**
 	 * Add a new obstacle to obstacles list with some processing:
 	 *  - remove those out of range

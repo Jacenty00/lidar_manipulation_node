@@ -15,10 +15,17 @@ bool LaserManipulationNode::init()
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
 
+  std::string laser_scan_topic;
+  std::string manipulated_laser_scan_topic;
+
   pnh.param("global_frame", global_frame_id_, std::string("map"));
+  pnh.param("laser_scan_topic", laser_scan_topic, std::string("scan"));
+  pnh.param("output_topic", manipulated_laser_scan_topic, std::string("manipulated_scan"));
+  pnh.param("radius", agent_radius_, 0.1);
+
   agents_poses_sub_ = nh.subscribe("/simulated_agents", 1, &LaserManipulationNode::agentsPosesCB, this);
-  laser_scan_sub_ = nh.subscribe("scan", 5, &LaserManipulationNode::laserScanCB, this);
-  virtual_obs_pub_ = nh.advertise<sensor_msgs::LaserScan>("scan_manipulated", 1, true);
+  laser_scan_sub_ = nh.subscribe(laser_scan_topic, 5, &LaserManipulationNode::laserScanCB, this);
+  manipulated_scan_pub_ = nh.advertise<sensor_msgs::LaserScan>(manipulated_laser_scan_topic, 1, true);
 
   return true;
 }
@@ -41,7 +48,7 @@ void LaserManipulationNode::laserScanCB(const sensor_msgs::LaserScan::ConstPtr &
   {
 
     // This can happen during startup, while some part of the localization chain is missing
-    // If not, probably sensor_frame is missconfigured
+    // If not, probably sensor_frame is misconfigured
     ROS_WARN_THROTTLE(2, "Cannot get tf %s -> %s: %s",
                       global_frame_id_.c_str(), sensor_frame_id_.c_str(), e.what());
   }
@@ -54,7 +61,7 @@ void LaserManipulationNode::laserScanCB(const sensor_msgs::LaserScan::ConstPtr &
     tf::Transform obs_abs_tf;
     tf::poseMsgToTF(agents_[i].pose, obs_abs_tf);
     tf::Transform obs_tf = robot_gb_inv * obs_abs_tf;
-    boost::shared_ptr<Obstacle> new_obs(new Column(std::to_string(agents_[i].id), obs_tf, 0.2, 1.6));
+    boost::shared_ptr<Obstacle> new_obs(new Column(std::to_string(agents_[i].id), obs_tf, agent_radius_, 1.6));
     add(new_obs, obstacles);
   }
 
@@ -106,7 +113,7 @@ bool LaserManipulationNode::add(boost::shared_ptr<Obstacle> &new_obs, std::vecto
 
   if (new_obs->distance() <= 0.0)
   {
-    ROS_WARN("The robot is inside an obstacle??? Ignore it (distance: %f)", new_obs->distance());
+    ROS_WARN_THROTTLE(1, "The robot is inside an obstacle??? Ignore it (distance: %f)", new_obs->distance());
     return false;
   }
 
@@ -129,7 +136,7 @@ bool LaserManipulationNode::add(boost::shared_ptr<Obstacle> &new_obs, std::vecto
       return true;
     }
   }
-  ROS_WARN("Obstacle out of range (distance: %f)", new_obs->distance());
+  ROS_WARN_THROTTLE(2, "Obstacle out of range (distance: %f)", new_obs->distance());
   return false;
 }
 
